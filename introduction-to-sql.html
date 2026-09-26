@@ -2292,22 +2292,22 @@ vertical-align: -.125em;
 <section id="main-ideas" class="level3" data-number="2.1.1">
 <h3 data-number="2.1.1" class="anchored" data-anchor-id="main-ideas"><span class="header-section-number">2.1.1</span> Main ideas</h3>
 <ul>
-<li>A <strong>database</strong> stores data in tables, and a <strong>relational database</strong> links those tables together through shared fields. For example, a <code>checkouts</code> table can connect a patron to a book using IDs from both tables.</li>
-<li>Databases are better than spreadsheets when data gets large, when many people need to use it at once, and when you need security and consistency. Spreadsheets are fine for small, one-person work.</li>
-<li>A <strong>table</strong> is made of <strong>records</strong> (rows), where each row is one thing and <strong>fields</strong> (columns), where each column is one attribute, like <code>name</code>.</li>
-<li>Naming conventions matter: table and field names should be <strong>lowercase</strong>, use <strong>underscores</strong> instead of spaces, and tables usually get <strong>plural</strong> names (<code>patrons</code>, not <code>patron</code>).</li>
-<li>Every table should have a <strong>unique identifier</strong> (a key), such as <code>card_num</code>, so each record can be told apart even if two people share a name.</li>
-<li>Each field has a <strong>data type</strong> that controls what it can hold. Common ones are <code>VARCHAR</code> for text, <code>INT</code> for whole numbers and <code>NUMERIC</code> for decimals. Data types keep data clean and make storage efficient.</li>
-<li>A <strong>schema</strong> is a blueprint of the database. It shows the tables, their fields, the data types and how the tables relate.</li>
-<li>Databases are stored on <strong>servers</strong>, which is why many users can access them at once.</li>
+<li>A <strong>database</strong> is basically where data gets stored in tables, and a <strong>relational database</strong> connects those tables through fields they have in common. For example, the <code>checkouts</code> table links a patron to a book by using the IDs from both tables.</li>
+<li>Spreadsheets work fine for small projects where only one person is using the data, but databases make more sense once the data gets really big, a lot of people need to use it at the same time, or security and consistency start to matter.</li>
+<li>Every <strong>table</strong> is made up of <strong>records</strong> (rows) and <strong>fields</strong> (columns). Each row is one thing, like one patron, and each column describes something about it, like their <code>name</code>.</li>
+<li>Naming things the right way actually matters. Table and field names should be <strong>lowercase</strong>, use <strong>underscores</strong> instead of spaces, and tables are usually <strong>plural</strong> (<code>patrons</code> instead of <code>patron</code>).</li>
+<li>Every table needs a <strong>unique identifier</strong>, or key, like <code>card_num</code>. That way you can tell records apart even if two people have the same name.</li>
+<li>Each field has a <strong>data type</strong> that decides what kind of data it can hold. The main ones I learned were <code>VARCHAR</code> for text, <code>INT</code> for whole numbers and <code>NUMERIC</code> for decimals. Using the right data types keeps the data clean and helps with storage.</li>
+<li>A <strong>schema</strong> is like a blueprint of the database. It shows all the tables, what fields they have, their data types and how the tables connect to each other.</li>
+<li>Databases are stored on <strong>servers</strong>, which is why a lot of people can access them at the same time.</li>
 </ul>
 </section>
 <section id="important-sql-syntax-and-terms" class="level3" data-number="2.1.2">
 <h3 data-number="2.1.2" class="anchored" data-anchor-id="important-sql-syntax-and-terms"><span class="header-section-number">2.1.2</span> Important SQL syntax and terms</h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 40%">
-<col style="width: 60%">
+<col style="width: 50%">
+<col style="width: 50%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2495,8 +2495,8 @@ vertical-align: -.125em;
 <section id="appendix-publication-links" class="level1 unnumbered">
 <h1 class="unnumbered">Appendix: Publication Links</h1>
 <ul>
-<li><a href="https://github.com/YOUR-USERNAME/ibm-6500-sql-learning-portfolio">GitHub Repository</a></li>
-<li><a href="https://YOUR-USERNAME.github.io/ibm-6500-sql-learning-portfolio/introduction-to-sql.html">Published Introduction to SQL Report</a></li>
+<li><a href="https://github.com/rsabilla/ibm-6500-sql-learning-portfolio.git">GitHub Repository</a></li>
+<li><a href="https://rsabilla.github.io/ibm-6500-sql-learning-portfolio/">Github Pages</a></li>
 </ul>
 </section>
 
