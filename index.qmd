@@ -1,0 +1,17 @@
+---
+title: "IBM 6500 SQL Learning Portfolio"
+number-sections: false
+toc: false
+---
+
+**Student:** Ron Stephen Sabilla
+**Course:** IBM 6500
+**Program:** MSDM, Cal Poly Pomona
+
+This portfolio contains my DataCamp course-completion evidence and learning notes for SQL and BigQuery. Each report includes my certificate, chapter-by-chapter notes with SQL examples, and ideas for using SQL in digital marketing and my CEP.
+
+## Reports
+
+- [Introduction to SQL](introduction-to-sql.html)
+- Intermediate SQL (to be completed)
+- Introduction to BigQuery (to be completed)

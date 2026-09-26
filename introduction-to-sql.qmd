@@ -1,0 +1,189 @@
+---
+title: "Introduction to SQL: Course Completion and Learning Notes"
+subtitle: "IBM 6500 | DataCamp Assignment 1"
+author: "Ron Stephen Sabilla"
+date: today
+format:
+  html:
+    toc: true
+    toc-title: "Contents"
+    toc-depth: 3
+    number-sections: true
+    smooth-scroll: true
+    embed-resources: true
+    theme: cosmo
+    highlight-style: github
+---
+
+# Course-Completion Evidence
+
+![DataCamp Introduction to SQL statement of accomplishment](images/introduction-to-sql-certificate.png){fig-alt="DataCamp certificate showing Ron Stephen Sabilla completed Introduction to SQL" width="85%"}
+
+I completed DataCamp's **Introduction to SQL** course through the IBM 6500 DataCamp classroom.
+
+# Learning Notes and Key Takeaways
+
+The course has two chapters. Most examples use DataCamp's sample **library database**, which has three tables: `books`, `patrons` (library members) and `checkouts`.
+
+## Chapter 1: Relational Databases
+
+### Main ideas
+
+- A **database** stores data in tables, and a **relational database** links those tables together through shared fields. For example, a `checkouts` table can connect a patron to a book using IDs from both tables.
+- Databases are better than spreadsheets when data gets large, when many people need to use it at once, and when you need security and consistency. Spreadsheets are fine for small, one-person work.
+- A **table** is made of **records** (rows), where each row is one thing and **fields** (columns), where each column is one attribute, like `name`.
+- Naming conventions matter: table and field names should be **lowercase**, use **underscores** instead of spaces, and tables usually get **plural** names (`patrons`, not `patron`).
+- Every table should have a **unique identifier** (a key), such as `card_num`, so each record can be told apart even if two people share a name.
+- Each field has a **data type** that controls what it can hold. Common ones are `VARCHAR` for text, `INT` for whole numbers and `NUMERIC` for decimals. Data types keep data clean and make storage efficient.
+- A **schema** is a blueprint of the database. It shows the tables, their fields, the data types and how the tables relate.
+- Databases are stored on **servers**, which is why many users can access them at once.
+
+### Important SQL syntax and terms
+
+| Term | Meaning |
+|------|---------|
+| Record | A row; one observation |
+| Field | A column; one attribute of each record |
+| Unique identifier (key) | A field whose value is different for every record |
+| `VARCHAR` | Text of flexible length |
+| `INT` | Whole numbers |
+| `NUMERIC` | Numbers with decimals, like prices or fines |
+| Schema | The blueprint showing tables, fields, data types and relationships |
+
+### Example
+
+```sql
+SELECT card_num, name, member_year, total_fine
+FROM patrons;
+```
+
+### Explanation of the example
+
+This query pulls four columns from the patrons table, and each row is one library member. card_num is the unique ID for each person, name is text (VARCHAR), member_year is a whole number (INT), and total_fine is a decimal (NUMERIC). Running a quick query like this first shows me how the table is set up before I start the actual analysis.
+
+### CEP application
+
+For my CEP client Wellness Ranch Therapy, customer data is most likely split into separate tables like clients, and marketing campaigns, connected by IDs like `client_id`. Learning what relational tables are and how keys work helps me plan how to organize that data so it's easy to link later. For example to see which campaign brought in which clients. Choosing the right data types also matters: storing appointment fees as `NUMERIC` instead of text means I can actually add them up.
+
+## Chapter 2: Querying
+
+### Main ideas
+
+- A **query** is a request for data from a database. Every simple query needs two **keywords**: `SELECT` (which fields) and `FROM` (which table).
+- You can select one field, several fields separated by commas, or every field with `*`.
+- Queries **return a result set**. They don't change the underlying table.
+- **Aliasing** with `AS` renames a field in the results only, which makes output easier to read.
+- `DISTINCT` returns only **unique values**, removing duplicates. Used on multiple fields, it returns unique **combinations**.
+- A **view** is a saved query, created with `CREATE VIEW`. It acts like a virtual table that always reflects the latest data.
+- **Formatting** matters: writing keywords in capitals, putting each clause on a new line and ending with a semicolon makes queries easier to read and debug.
+- There are different **SQL flavors**, such as **PostgreSQL** (free and open-source) and **SQL Server** (Microsoft). They share the same core keywords but have small differences. For example, PostgreSQL uses `LIMIT` to cap the number of rows returned, while SQL Server uses `TOP`.
+
+### Important SQL syntax
+
+| Syntax | What it does |
+|--------|--------------|
+| `SELECT` | Chooses the fields to return |
+| `FROM` | Names the table to pull from |
+| `*` | Selects all fields |
+| `AS` | Gives a field a temporary name (alias) in the results |
+| `DISTINCT` | Returns only unique values or combinations |
+| `CREATE VIEW ... AS` | Saves a query as a virtual table |
+| `LIMIT n` | PostgreSQL: returns only the first *n* rows |
+| `TOP(n)` | SQL Server: returns only the first *n* rows |
+| `;` | Marks the end of a query |
+
+### Examples
+
+**Selecting multiple fields and using an alias**
+
+```sql
+SELECT title, author AS writer
+FROM books;
+```
+
+This returns every book's title and author, but the `author` column shows up as `writer` in the results. The actual table isn't changed.
+
+**Finding unique values**
+
+```sql
+SELECT DISTINCT genre
+FROM books;
+```
+
+This returns each genre only once, even if the table has hundreds of books in the same genre. It's a fast way to see what categories exist in a field.
+
+**Unique combinations of two fields**
+
+```sql
+SELECT DISTINCT author, genre
+FROM books;
+```
+
+This returns each unique author-and-genre pair. An author who writes in two genres appears twice, once per genre.
+
+**Saving a query as a view**
+
+```sql
+CREATE VIEW library_authors AS
+SELECT DISTINCT author AS unique_author
+FROM books;
+```
+
+This saves the query as a view called `library_authors`. After that, I can query it like a regular table:
+
+```sql
+SELECT *
+FROM library_authors;
+```
+
+**Limiting results in two SQL flavors**
+
+```sql
+-- PostgreSQL
+SELECT genre
+FROM books
+LIMIT 2;
+```
+
+```sql
+-- SQL Server
+SELECT TOP(2) genre
+FROM books;
+```
+
+Both queries return just the first two rows. The only difference is where the limit goes: `LIMIT` comes at the end in PostgreSQL, while `TOP` comes right after `SELECT` in SQL Server.
+
+### CEP application
+
+These are the commands I'd use first on any marketing data set:
+
+- `SELECT DISTINCT` shows which values exist in a field, such as the unique lead sources (Instagram, Google Ads, referral) or the unique cities where clients live. That's useful for audience targeting and for spotting messy data, like "instagram" and "Instagram" showing up as two separate values.
+- `AS` makes query results readable when I share them with a client who doesn't know the database field names.
+- `LIMIT` lets me preview a large table quickly before running a full analysis.
+- A **view** could save a query my team runs every week, like a list of active clients, so everyone uses the same definition.
+
+# Overall Reflection and Future Reference
+
+## Most useful skills
+
+The most useful skills were writing basic `SELECT ... FROM` queries and using `DISTINCT`. Almost every analysis starts with pulling the right fields and understanding which values exist, so these will come up constantly.
+
+## Most challenging concepts
+
+The most challenging part was keeping the order and role of each clause straight, especially remembering that fields go after `SELECT` and the table goes after `FROM`. Understanding how `DISTINCT` works on more than one field also took some practice, since it returns unique *combinations* rather than unique values of each field. Views were new to me too, and it took a moment to see how a view differs from a regular table.
+
+## How SQL supports marketing analytics and my CEP
+
+SQL is how analysts pull data out of the systems where it's stored like CRMs, e-commerce platforms, survey tools. For digital marketing, it can be used to segment customers, list the channels that bring in leads, clean up survey responses and prepare data for dashboards. SQL can help me organize my client's data and pull the specific pieces I need for analysis, instead of scrolling through large spreadsheets by hand.
+
+## Concepts to review in the future
+
+- The differences between SQL flavors (`LIMIT` vs. `TOP`), since BigQuery will be another flavor
+- Creating and using views
+- Data types, especially when numbers are accidentally stored as text
+- Clause order, which will matter more as I learn `WHERE`, `ORDER BY` and `GROUP BY` in Intermediate SQL
+
+# Appendix: Publication Links {.unnumbered}
+
+- [GitHub Repository](https://github.com/YOUR-USERNAME/ibm-6500-sql-learning-portfolio)
+- [Published Introduction to SQL Report](https://YOUR-USERNAME.github.io/ibm-6500-sql-learning-portfolio/introduction-to-sql.html)
