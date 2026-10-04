@@ -1,0 +1,305 @@
+---
+title: "Introduction to BigQuery: Course Completion and Learning Notes"
+subtitle: "IBM 6500 | DataCamp Assignment 2"
+author: "Ron Stephen Sabilla"
+date: today
+
+format:
+  html:
+    toc: true
+    toc-title: "Contents"
+    toc-depth: 3
+    number-sections: true
+    smooth-scroll: true
+    embed-resources: true
+---
+
+# Course-Completion Evidence
+
+![DataCamp Introduction to BigQuery statement of accomplishment](images/introduction-to-bigquery-certificate.png)
+
+I completed DataCamp's **Introduction to BigQuery** course through the IBM 6500 DataCamp classroom on October 3, 2026.
+
+# Learning Notes and Key Takeaways
+
+Most examples in the course use an **ecommerce** dataset that works like a real data warehouse. It has several connected tables: `ecomm_orders` (orders with a nested list of items), `ecomm_order_details` (order status and purchase dates), `ecomm_payments` (payment type, value and installments), `ecomm_products` (product categories and weights) and `ecomm_sellers` (seller locations). In BigQuery, tables are referenced as `dataset.table`, so the orders table is written as `ecommerce.ecomm_orders`.
+
+## Chapter 1: BigQuery Fundamentals
+
+### Main ideas
+
+**BigQuery** is Google Cloud's data warehouse. It's built for **analytical** work, like reports, dashboards and summaries across huge amounts of data, instead of the small, constant updates an app database handles.
+
+What makes BigQuery different is its architecture. **Compute and storage are separated**, so each one can grow on its own and you only pay for what you use. It's also **serverless**, so there's no database server to set up or maintain. And it's built to handle **many queries at the same time**, which is why it works well behind business intelligence dashboards that lots of people use.
+
+BigQuery is **not** built for transactional (OLTP) work, like constantly inserting or updating single rows. A regular database such as Cloud SQL or Postgres is better for that. A common setup is that an app runs on a transactional database and the data gets copied into BigQuery for analysis.
+
+BigQuery uses **GoogleSQL**, so everything from Introduction to SQL still applies (`SELECT`, `FROM`, `WHERE`, `LIMIT`, `DISTINCT`). It also adds functions for dates, nested data and analytics that most SQL flavors don't have.
+
+Date functions were a big part of this chapter. Since most marketing data is time-based, being able to pull out a month, compare date ranges or count days between dates comes up all the time.
+
+### BigQuery terminology and procedures
+
+| Term | Meaning |
+|---|---|
+| Project | The top-level Google Cloud container that holds datasets and handles billing |
+| Dataset | A folder that groups related tables (like `ecommerce`) |
+| Table | Where the actual data lives (like `ecomm_orders`) |
+| Data warehouse | A system built to store and analyze large amounts of data for reporting |
+| OLAP | Online analytical processing; reading and summarizing lots of data (what BigQuery is for) |
+| OLTP | Online transaction processing; many small writes and updates (not BigQuery's strength) |
+| Separation of compute and storage | Storage and processing scale and are billed independently |
+| GoogleSQL | The SQL flavor BigQuery uses |
+
+**Procedure for writing a BigQuery query:** open the BigQuery console, find the project and dataset in the Explorer panel, click a table to check its schema (column names and data types), then write the query in the editor using the full `project.dataset.table` or `dataset.table` path. Before running it, the console shows an estimate of how much data the query will scan.
+
+### Important SQL syntax
+
+| Syntax | What it does |
+|---|---|
+| `SELECT * ... LIMIT 10` | Previews rows (but still scans every column) |
+| `SELECT DISTINCT` | Returns unique values |
+| `JOIN ... USING (column)` | Joins two tables on a column with the same name in both |
+| `EXTRACT(part FROM timestamp)` | Pulls out a `DATE`, `MONTH`, `QUARTER`, `YEAR` and so on |
+| `FORMAT_TIMESTAMP('%D', timestamp)` | Formats a timestamp as text, like `MM/DD/YY` |
+| `TIMESTAMP_ADD(ts, INTERVAL 7 DAY)` | Moves a timestamp forward |
+| `TIMESTAMP_SUB(ts, INTERVAL 30 DAY)` | Moves a timestamp backward |
+| `DATE_DIFF(date1, date2, DAY)` | Counts the days between two dates (date1 minus date2) |
+| `CURRENT_DATE()` / `CURRENT_TIMESTAMP()` | Returns today's date or the current time |
+
+### Example
+
+```sql
+SELECT
+  COUNT(order_id)
+FROM ecommerce.ecomm_order_details
+WHERE order_purchase_timestamp BETWEEN
+  TIMESTAMP_SUB(TIMESTAMP('2017-11-24'), INTERVAL 3 DAY)
+  AND TIMESTAMP_ADD(TIMESTAMP('2017-11-24'), INTERVAL 3 DAY);
+```
+
+### Explanation of the example
+
+This query counts the orders placed from three days before Black Friday 2017 to three days after it. `TIMESTAMP('2017-11-24')` turns the date into a timestamp, `TIMESTAMP_SUB` and `TIMESTAMP_ADD` build the window on either side, and `BETWEEN` keeps only the orders inside that window. A query like this is useful for measuring how a promotion or holiday affected sales compared to a normal week.
+
+### CEP application
+
+For my CEP client Wellness Ranch Therapy, our team is working on setting up GA4 and launching Google Ad Grants campaigns. GA4 can export raw event data straight into BigQuery, where each website event (a page view, a form submission, a donation click) becomes a row. Date functions would let me compare activity before and after a website change or a campaign launch, like counting contact-form submissions in the 30 days before and after our ads go live.
+
+## Chapter 2: Nested Data and Common Table Expressions
+
+### Main ideas
+
+BigQuery tables don't have to be flat. A single column can hold an **ARRAY** (a list of values) or a **STRUCT** (a group of named fields, kind of like a mini-row). In the course, the `order_items` column stores every item in an order as an array of structs, with fields like `product_id`, `price` and `seller_id`.
+
+Storing nested data keeps related information together and avoids extra joins, but you need special tools to work with it. **SEARCH** checks whether a value appears anywhere inside nested data without unpacking it. **UNNEST** flattens an array so each item gets its own row, and then **dot notation** (`items.price`) pulls out a specific field.
+
+**Common table expressions (CTEs)**, written with `WITH`, create a temporary named result I can use later in the same query. They make long queries easier to read by breaking them into steps. They can also make queries cheaper: filtering data inside a CTE first means less data gets carried into the rest of the query. You can chain multiple CTEs together by separating them with commas.
+
+### BigQuery terminology and procedures
+
+| Term | Meaning |
+|---|---|
+| ARRAY | An ordered list of values stored in one column |
+| STRUCT | A group of named fields stored together, like a record inside a record |
+| Nested data | Arrays and structs stored inside a table instead of in separate tables |
+| UNNEST | Flattens an array so each element becomes its own row |
+| Dot notation | Accesses a field inside a struct, like `items.price` |
+| SEARCH | Returns `TRUE` or `FALSE` depending on whether a value appears in the data |
+| CTE | A temporary, named result created with `WITH` |
+
+### Important SQL syntax
+
+| Syntax | What it does |
+|---|---|
+| `ARRAY(SELECT ... )` | Builds an array from a subquery |
+| `SEARCH(column, 'value')` | Searches inside a column, including nested data |
+| `FROM table, UNNEST(array_column) AS alias` | Flattens the array and pairs each element with its row |
+| `alias.field` | Reads one field from an unnested struct |
+| `ARRAY_LENGTH(array_column)` | Counts how many elements are in an array |
+| `WITH name AS ( ... )` | Creates a CTE |
+| `WITH a AS (...), b AS (...)` | Creates multiple CTEs |
+
+### Example
+
+```sql
+WITH orders AS (
+  SELECT order_id
+  FROM ecommerce.ecomm_orders, UNNEST(order_items) items
+  WHERE items.price > 150
+)
+
+SELECT
+  COUNT(order_id),
+  order_status
+FROM ecommerce.ecomm_order_details od
+JOIN orders o USING (order_id)
+GROUP BY order_status;
+```
+
+### Explanation of the example
+
+The CTE unnests `order_items` so each item is its own row, then keeps only the orders that include an item priced over $150. The main query joins those orders to `ecomm_order_details` and counts them by `order_status` (delivered, shipped, canceled and so on). Filtering inside the CTE first means the join only works with the orders that matter, which keeps the query faster and cheaper.
+
+### CEP application
+
+GA4's BigQuery export uses nested data heavily. Each event row has an `event_params` column, which is an array of structs holding details like the page URL or form name. To find something like which pages led to a contact-form submission, I'd need to `UNNEST(event_params)` and use dot notation to pull out the right parameter. CTEs would help me organize that analysis into clear steps, like one CTE for form submissions and another for page views, before combining them.
+
+## Chapter 3: Aggregations and Window Functions
+
+### Main ideas
+
+Beyond the usual `COUNT`, `SUM` and `AVG`, GoogleSQL has several special aggregate functions that save a lot of code:
+
+- **Conditional aggregates:** `COUNTIF` counts only the rows that meet a condition, and `HAVING` filters groups after they've been aggregated (unlike `WHERE`, which filters rows before grouping).
+- **ANY_VALUE:** returns one value from a group. Adding `HAVING MAX` or `HAVING MIN` inside it picks the value from the row with the highest or lowest value in another column.
+- **Logical aggregates:** `LOGICAL_AND` returns `TRUE` only if every row in a group meets a condition, and `LOGICAL_OR` returns `TRUE` if at least one does.
+- **String and array aggregates:** `STRING_AGG` combines text values into one string, and `ARRAY_CONCAT_AGG` merges arrays into one.
+- **Approximate aggregates:** `APPROX_COUNT_DISTINCT`, `APPROX_TOP_COUNT`, `APPROX_QUANTILES` and `APPROX_TOP_SUM` give very close estimates much faster than exact functions on huge datasets.
+
+**Window functions** calculate something across a set of related rows *without* collapsing them into one row the way `GROUP BY` does. The `OVER()` clause defines the window: `PARTITION BY` splits the data into groups, `ORDER BY` sets the order, and `ROWS BETWEEN` sets how many rows before or after the current row to include. `QUALIFY` filters on a window function's result, the same way `WHERE` filters regular rows.
+
+### BigQuery terminology and procedures
+
+| Term | Meaning |
+|---|---|
+| Conditional aggregate | An aggregate that only counts or sums rows meeting a condition |
+| Approximate aggregate | A faster aggregate that returns a close estimate instead of an exact answer |
+| Window function | A calculation across related rows that keeps every row in the result |
+| Partition | A group of rows the window function works within |
+| Rolling (moving) average | An average that slides along the data, like the current row and the nine before it |
+| QUALIFY | A filter applied to window function results |
+
+### Important SQL syntax
+
+| Syntax | What it does |
+|---|---|
+| `COUNTIF(condition)` | Counts rows where the condition is true |
+| `HAVING AVG(column) > 10000` | Filters groups by an aggregate |
+| `ANY_VALUE(col HAVING MAX other_col)` | Returns the value from the row with the highest `other_col` |
+| `LOGICAL_AND(condition)` / `LOGICAL_OR(condition)` | Checks if all or any rows meet a condition |
+| `STRING_AGG(DISTINCT col, ', ')` | Combines unique text values into one string |
+| `APPROX_COUNT_DISTINCT(col)` | Estimates the number of unique values |
+| `APPROX_TOP_COUNT(col, 3)` | Estimates the three most frequent values |
+| `RANK() OVER(ORDER BY col DESC)` | Ranks rows from highest to lowest |
+| `LAG(col)` / `LEAD(col)` | Returns the previous or next row's value |
+| `ROWS BETWEEN 9 PRECEDING AND CURRENT ROW` | Sets a 10-row window ending at the current row |
+| `QUALIFY rolling_avg > 500` | Keeps rows where the window result meets a condition |
+
+### Example
+
+```sql
+SELECT
+  order_id,
+  order_purchase_timestamp,
+  AVG(item.price)
+    OVER(ORDER BY order_purchase_timestamp
+         ROWS BETWEEN 9 PRECEDING AND CURRENT ROW) AS rolling_avg
+FROM ecommerce.ecomm_order_details od
+JOIN ecommerce.ecomm_orders o
+USING (order_id), UNNEST(o.order_items) AS item
+QUALIFY rolling_avg > 500
+ORDER BY order_purchase_timestamp;
+```
+
+### Explanation of the example
+
+This query calculates a rolling average of item prices across the current item and the nine before it, in order of purchase time. Then `QUALIFY` keeps only the moments when that rolling average went over $500. A rolling average smooths out single spikes, so this finds stretches of high-value sales instead of one-off expensive items. That's useful for spotting when big purchases cluster together, like during a promotion.
+
+### CEP application
+
+These functions fit our Google Ad Grants work well. `COUNTIF` could count conversions by campaign in one line, and `HAVING` could flag keywords with click-through rates below the 5% Ad Grants requirement. A rolling average of daily CTR would smooth out day-to-day noise so I can see real trends. `LAG` could compare each week's conversions to the week before, and `RANK` could rank landing pages by conversion rate to show which ones to keep and which to improve.
+
+## Chapter 4: Joins and Query Optimization
+
+### Main ideas
+
+Data warehouses spread data across many tables linked by keys, so joins come up constantly. Besides the regular `INNER JOIN` (only matching rows), BigQuery supports:
+
+- **LEFT JOIN:** keeps every row from the left table, matched or not.
+- **RIGHT JOIN:** keeps every row from the right table, matched or not.
+- **FULL OUTER JOIN:** keeps every row from both tables.
+- **CROSS JOIN:** pairs every row with every row from the other table. `CROSS JOIN UNNEST(...)` is the full version of the comma shorthand used to unnest arrays.
+
+Joins are often combined with aggregations, like counting orders per product by joining a long orders table to a shorter products table.
+
+**Optimization** matters a lot in BigQuery because it charges based on how much data a query **scans**. BigQuery stores data by column, so:
+
+- **Select only the columns you need.** `SELECT *` reads every column, even with `LIMIT`. `LIMIT` cuts the rows returned but doesn't reduce the data scanned.
+- **Filter early,** especially by date, so less data gets processed.
+- **Use CTEs** to narrow the data down before joining.
+- **Use approximate functions** when an exact count isn't necessary.
+
+### BigQuery terminology and procedures
+
+| Term | Meaning |
+|---|---|
+| Inner join | Returns only rows that match in both tables |
+| Outer join | Keeps unmatched rows from one or both tables (LEFT, RIGHT, FULL) |
+| Cross join | Combines every row of one table with every row of another |
+| Bytes processed | The amount of data a query scans, which drives cost |
+| Columnar storage | Data stored by column, so unused columns aren't read |
+
+**Procedure for checking query cost:** before running a query, look at the estimate in the top right of the BigQuery editor that says how much data it will process. Removing unneeded columns or adding a date filter should make that number drop.
+
+### Important SQL syntax
+
+| Syntax | What it does |
+|---|---|
+| `LEFT JOIN table ON a.id = b.id` | Keeps all left-table rows |
+| `RIGHT JOIN table ON a.id = b.id` | Keeps all right-table rows |
+| `FULL OUTER JOIN table ON a.id = b.id` | Keeps all rows from both tables |
+| `CROSS JOIN UNNEST(array_column) alias` | Flattens an array and pairs it with its row |
+| `JOIN table USING (column)` | Joins on a shared column name |
+
+### Example
+
+```sql
+SELECT
+  p.payment_installments,
+  APPROX_COUNT_DISTINCT(p.order_id),
+  AVG(p.payment_value)
+FROM ecommerce.ecomm_payments p
+JOIN ecommerce.ecomm_order_details o USING (order_id)
+WHERE o.order_purchase_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 90 DAY)
+GROUP BY p.payment_installments;
+```
+
+### Explanation of the example
+
+This query builds a payment-plan report for a finance team. It joins payments to order details, keeps only orders from the last 90 days, and groups by the number of installments. For each group, it estimates how many unique orders used that plan and finds the average payment. It's optimized by selecting only the columns it needs, filtering by date, and using `APPROX_COUNT_DISTINCT` instead of an exact distinct count.
+
+### CEP application
+
+For the CEP, I'll need to combine data from different sources, like Google Ads campaign data with GA4 conversion data, joined on something like date or campaign name. A `LEFT JOIN` would keep every campaign even if it had no conversions, which matters because a campaign with zero conversions is still important to see. The optimization habits matter too: Wellness Ranch is a nonprofit, so keeping queries small helps stay inside BigQuery's free usage limits.
+
+# Overall Reflection and Future Reference
+
+## Most useful concepts and procedures
+
+The most useful things I learned were `UNNEST` with dot notation, CTEs and window functions. Nested data shows up all over real marketing data, especially GA4 exports, so knowing how to flatten it is essential. CTEs made long queries way easier to read and build step by step, and window functions like `LAG` and rolling averages are exactly what trend analysis needs.
+
+## How BigQuery is different from learning SQL alone
+
+Learning SQL syntax taught me how to ask for data. BigQuery adds the side of things I didn't have to think about before: where the data lives (projects, datasets, tables), how it's stored (by column, with nested arrays and structs), and what each query costs. In Introduction to SQL, `SELECT *` was harmless. In BigQuery, it can actually cost money on a big table. So writing a query isn't just about getting the right answer anymore. It's also about getting it efficiently.
+
+## Most challenging concepts
+
+Nested data was the hardest part at first. It took practice to understand when I needed `UNNEST`, what the comma in `FROM table, UNNEST(...)` actually does, and how dot notation reaches into a struct. Window functions were also tricky, especially remembering the difference between `PARTITION BY` and `GROUP BY` and getting the `ROWS BETWEEN` order right. A few exercises also taught me that small details, like column aliases and line breaks around comments, can break a query or change its output.
+
+## How BigQuery supports marketing analytics and my CEP
+
+BigQuery is where large marketing datasets come together. GA4 can export raw event data to it, and other sources like ad platforms or CRMs can be loaded alongside it. That makes it possible to answer questions the regular GA4 reports can't, like tracing a visitor's full path from an ad click to a donation, or joining survey responses to website behavior. For our CEP with Wellness Ranch, BigQuery could support conversion tracking, Google Ad Grants performance analysis (CTR, conversion rate, search terms) and monthly reporting once GA4 is set up.
+
+## Concepts to review in the future
+
+- `UNNEST` and dot notation for GA4's `event_params`
+- Window function syntax, especially `PARTITION BY`, `ROWS BETWEEN` and `QUALIFY`
+- The approximate aggregate functions and which one fits which question
+- Date functions and the argument order for `DATE_DIFF` and `FORMAT_TIMESTAMP`
+- Habits for keeping query costs low, like selecting specific columns and filtering by date
+
+# Appendix: Publication Links {.unnumbered}
+
+- [GitHub Repository](https://github.com/rsabilla/ibm-6500-sql-learning-portfolio)
+- [Published Report](https://rsabilla.github.io/ibm-6500-sql-learning-portfolio/)
