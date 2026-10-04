@@ -16,7 +16,7 @@ format:
 
 # Course-Completion Evidence
 
-![DataCamp Introduction to BigQuery statement of accomplishment](images/introduction-to-bigquery-certificate.png)
+![DataCamp Introduction to BigQuery statement of accomplishment](introduction-to-bigquery-certificate.png)
 
 I completed DataCamp's **Introduction to BigQuery** course through the IBM 6500 DataCamp classroom on October 3, 2026.
 
